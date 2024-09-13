@@ -1,4 +1,4 @@
-import { Upload, FileUp } from "lucide-react";
+import { Upload, Send } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -35,7 +35,8 @@ export function UploadSection() {
           </label>
         </div>
         <Button className="mt-4 w-full">
-          <FileUp className="mr-2 h-4 w-4" /> Upload Dataset
+          Upload Data
+          <Send className="ml-2 h-4 w-4" />
         </Button>
       </CardContent>
     </Card>
