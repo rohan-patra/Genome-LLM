@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Send } from "lucide-react";
 import {
   Card,
@@ -10,7 +11,33 @@ import { Input } from "~/components/ui/input";
 import { ScrollArea } from "~/components/ui/scroll-area";
 import { Button } from "~/components/ui/button";
 
-export function ChatInterface() {
+interface Message {
+  text: string;
+  isUser: boolean;
+}
+
+interface ChatInterfaceProps {
+  filePath: string;
+  onSendMessage: (message: string) => Promise<string>;
+}
+
+export function ChatInterface({ filePath, onSendMessage }: ChatInterfaceProps) {
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [input, setInput] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!input.trim()) return;
+
+    const userMessage: Message = { text: input, isUser: true };
+    setMessages((prev) => [...prev, userMessage]);
+    setInput("");
+
+    const response = await onSendMessage(input);
+    const aiMessage: Message = { text: response, isUser: false };
+    setMessages((prev) => [...prev, aiMessage]);
+  };
+
   return (
     <Card className="w-full max-w-2xl">
       <CardHeader>
@@ -19,24 +46,38 @@ export function ChatInterface() {
       <CardContent>
         <ScrollArea className="h-[400px] w-full pr-4">
           <div className="space-y-4">
-            <div className="flex items-start space-x-4">
-              <div className="bg-primary text-primary-foreground rounded-lg p-2">
-                Hello! I&apos;ve analyzed your genome dataset. What would you
-                like to know?
+            {messages.map((message, index) => (
+              <div
+                key={index}
+                className={`flex items-start ${
+                  message.isUser ? "justify-end" : ""
+                } space-x-4`}
+              >
+                <div
+                  className={`rounded-lg p-2 ${
+                    message.isUser
+                      ? "bg-muted"
+                      : "bg-primary text-primary-foreground"
+                  }`}
+                >
+                  {message.text}
+                </div>
               </div>
-            </div>
-            <div className="flex items-start justify-end space-x-4">
-              <div className="bg-muted rounded-lg p-2">
-                Can you tell me about any notable genetic markers?
-              </div>
-            </div>
-            {/* Add more messages as needed */}
+            ))}
           </div>
         </ScrollArea>
       </CardContent>
       <CardFooter>
-        <form className="flex w-full items-center space-x-2">
-          <Input className="flex-1" placeholder="Type your message..." />
+        <form
+          onSubmit={handleSubmit}
+          className="flex w-full items-center space-x-2"
+        >
+          <Input
+            className="flex-1"
+            placeholder="Type your message..."
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+          />
           <Button type="submit">
             <Send className="h-4 w-4" />
           </Button>
